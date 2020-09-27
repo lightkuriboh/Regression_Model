@@ -18,7 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(datasets)
 ```
-## This report analyzes the mtcars database. The main purpose is to see if there is any direct relationship between mpg and transmission.  
+## Executive summary  
+This report analyzes the mtcars database. The main purpose is to see if there is any direct relationship between mpg and transmission.  
   
 ## First analysis  
   
