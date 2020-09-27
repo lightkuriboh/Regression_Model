@@ -1,0 +1,114 @@
+---
+title: "Regression Model"
+author: "kuriboh"
+date: "9/27/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## This chunk loads the libraries used in this report  
+```{r}
+library(ggplot2)
+library(datasets)
+```
+## This report analyzes the mtcars database. The main purpose is to see if there is any direct relationship between mpg and transmission.  
+  
+## First analysis  
+  
+* Skewing checking  
+Exploring the dataset, I want to check if the data is skewed on the am variable. If these is any on the either class, the result might be not correct.  
+```{r}
+data(mtcars)
+table(mtcars$am)
+```
+There are 19 autos and 13 manuals, there is no skews.  
+  
+* Exploring correlations  
+As the following step, I checked the correlation between mpg and the other variables.
+
+```{r}
+cor(mtcars$mpg, mtcars)
+```
+We all know that the heavier cars consume more fuel than the light ones. And according to the above result, the wt (weight) has the "nearest" correlation with the mpg, and followed by cyl (cylinders), this really makes sense. For the convenience, I will name this observation (1)  
+
+* For better visualization, I will name the tranmission types  
+```{r}
+mtcars$am <- as.factor(mtcars$am)
+levels(mtcars$am) <- c("manual", "auto")
+```
+  
+## Trying models  
+At first, I will plot the mpg by the type of transmission.  
+```{r}
+ggplot(mtcars, aes(x=am, y=mpg, fill=am)) + geom_boxplot(alpha=0.2)
+```
+  
+We can easily see that the manual cars have better mpg than automatic cars.  
+Now comes to the models to verify our analysis.  
+
+* First model  
+To verify, I will use a simple linear model.  
+```{r}
+model_1 <- lm(mtcars$mpg ~ mtcars$am)
+summary(model_1)
+```
+
+This model shows that manual cars has 7.245mpg better than automatic ones.  
+  
+** Second model  
+Looks back at the observation (1), I want to check if the cylinders affect mpg.  
+```{r}
+model_2 <- lm(mtcars$mpg ~ as.numeric(mtcars$am) + mtcars$wt + mtcars$cyl)
+summary(model_2)
+```
+  
+The weight affects the mpg in 3.12mpg per weight unit, the number of cylinders also has something to say but the transmission has a very low impact.  
+  
+* Third model  
+Let's look at observation (1) again, I will check if there is any correlation between weights and transmission types.  
+```{r}
+cor(as.numeric(mtcars$am), mtcars$wt)
+```
+We can see there is a strong correlation between weight and transmission types. The manual cars are lighter than the automatic ones.  
+
+Now lets see on a plot.  
+```{r}
+ggplot(mtcars, aes(x=wt, y=mpg, color=am)) + geom_point()
+```
+From this, I want to try to use another model, similar to the previous ones, but with both weight and transmission types as predictor for mpg.  
+```{r}
+model_3 <- lm(mtcars$mpg ~ as.numeric(mtcars$am) + mtcars$wt)
+summary(model_3)
+```
+
+Weight influences -5.35 over mpg but transmission is neutral (0.02).  
+
+The last step, comparing the three models:  
+```{r}
+anova(model_1, model_2, model_3)
+```
+  
+We observe that the third model is the best among the threes.  
+
+## Residual diagnosing  
+Model 3: mpg ~ wt
+```{r}
+par(mfrow=c(2, 2))
+plot(model_3)
+```
+  
+We can see that there's a good fit for the residuals, even considering some outliers, I am confident that our model is accurate.  
+  
+## Conclusion  
+
+* We cannot conclude that the cars' type of transmission affects the fuel consumption.  
+* The lighter cars have better mpg than heavier ones.  
+* Automatic transmission cars tend to be heavier than manual cars, and that's the reason why they show lower mpg (worse fuel consumption).  
+* I am wondering if there is any manual transmission Lamborghini car for me to buy?  
